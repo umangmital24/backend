@@ -1,6 +1,8 @@
 import mongoose, {Schema} from "mongoose";
-import { JsonWebTokenError } from "jsonwebtoken";
+//import { JsonWebTokenError } from "jsonwebtoken";
 import bcrypt from "bcrypt";
+import pkg from 'jsonwebtoken';
+const { JsonWebTokenError } = pkg;
 
 const UserSchema = new Schema({
     username: {
@@ -43,19 +45,19 @@ const UserSchema = new Schema({
 
 },{timestamps: true});
 
-userSchema.pre("save",async function(next){
+UserSchema.pre("save",async function(next){
     if(!this.isModified("password")) return next();
 
     this.password = await bcrypt.hash(this.password, 8);
     next();
 });
 
-userSchema.methods.isPasswordCorrect = async function(password){
+UserSchema.methods.isPasswordCorrect = async function(password){
    return await bcrypt.compare(password, this.password);
 
 }
 
-userSchema.methods.generateRefreshToken = function(){
+UserSchema.methods.generateRefreshToken = function(){
     return JsonWebTokenError.sign(
         {
             _id: this._id,
@@ -70,7 +72,7 @@ userSchema.methods.generateRefreshToken = function(){
 
     )}
 
-    userSchema.methods.generateRefreshToken = function(){
+    UserSchema.methods.generateRefreshToken = function(){
         return JsonWebTokenError.sign(
             {
                 _id: this._id,
@@ -82,7 +84,7 @@ userSchema.methods.generateRefreshToken = function(){
     
         )}
 
-        userSchema.methods.toJSON = function(){
+        UserSchema.methods.toJSON = function(){
             const user = this.toObject();
             delete user.password;
             delete user.refreshToken;
